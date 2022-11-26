@@ -1,0 +1,118 @@
+import express from 'express'
+import * as diaryService from '../services/diary/diaryService'
+import { Response } from '../types/utils'
+import { verifyToken } from '../middleware/jwt'
+
+const router = express.Router()
+
+/**
+   * @swagger
+   * /api/diaries:
+   *  get:
+   *     security:
+   *     - Authorization: []
+   *     tags:
+   *     - Diaries
+   *     summary: Returns all diaries entries
+   *     responses:
+   *       200:
+   *         description: All diaries
+   *         content:
+   *          application/json:
+   *           schema:
+   *              $ref: '#/components/schemas/Response'
+   */
+router.get('/', verifyToken, (_req, res) => {
+    const response: Response = {
+        message: 'All diaries',
+        status: 200,
+        payload: diaryService.getNonSensitiveDiaries()
+    }
+
+    res.json(response)
+})
+
+/**
+   * @swagger
+   * '/api/diaries/{id}':
+   *  get:
+   *     security:
+   *     - Authorization: []
+   *     tags:
+   *     - Diaries
+   *     summary: Returns a diary by id
+   *     parameters:
+   *      - name: id
+   *        in: path
+   *        description: ID of diary to return
+   *        required: true
+   *     responses:
+   *       200:
+   *         description: Diary found by id
+   *         content:
+   *          application/json:
+   *           schema:
+   *              $ref: '#/components/schemas/Response'
+   *       404:
+   *         description: Not found
+   */
+router.get('/:id', verifyToken, (req, res) => {
+    const diary = diaryService.getDiaryBy(+req.params.id)
+    const error = diary === undefined
+
+    const response: Response = {
+        message: error ? 'Diary entry not found' : 'Diary entry found',
+        status: error ? 404 : 200,
+        payload: diary
+    }
+
+    res.json(response)
+})
+
+/**
+   * @swagger
+   * '/api/diaries':
+   *  post:
+   *     security:
+   *     - Authorization: []
+   *     tags:
+   *     - Diaries
+   *     summary: Adds a new diary entry
+   *     requestBody:
+   *      required: true
+   *      content:
+   *        application/json:
+   *           schema:
+   *              $ref: '#/components/schemas/NewDiaryEntry'
+   *     responses:
+   *      200:
+   *        description: Success
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/Response'
+   *      500:
+   *        description: Internal server error
+   */
+router.post('/', verifyToken, (req, res) => {
+    const { date, weather, visibility, comment } = req.body
+
+    const newDiary = diaryService.addDiary({
+        date,
+        weather,
+        visibility,
+        comment
+    })
+
+    const error = newDiary instanceof Array
+
+    const response: Response = {
+        message: error ? 'Errors at adding diary entry' : 'Diary entry added',
+        status: error ? 500 : 200,
+        payload: newDiary
+    }
+
+    res.json(response)
+})
+
+export default router
