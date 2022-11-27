@@ -26,7 +26,7 @@ export function verifyToken (req: Request, res: Response, next: Function): void 
     
     jwt.verify(token, config.key, (err: any) => {
         if (err !== null)
-            res.sendStatus(401).json('Unauthorized')
+            res.status(401).json('Unauthorized')
         next() 
     }) 
 }
