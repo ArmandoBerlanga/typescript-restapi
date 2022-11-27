@@ -54,10 +54,9 @@ CREATE PROCEDURE Info.GetDiaryEntry
     @ID INT = NULL
 AS
 BEGIN
-    IF @ID IS NULL
-        SELECT * FROM Info.Diary
-    ELSE
-        SELECT * FROM Info.Diary WHERE ID = @ID
+    SELECT ID as id, [Date] as date, Weather as weather, Visibility as visibility, Comment as comment
+    FROM Info.Diary
+    WHERE ISNULL(@ID, ID) = ID
 END
 GO
 

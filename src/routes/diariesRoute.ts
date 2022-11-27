@@ -23,13 +23,23 @@ const router = express.Router()
    *              $ref: '#/components/schemas/Response'
    */
 router.get('/', verifyToken, (_req, res) => {
-    const response: Response = {
-        message: 'All diaries',
-        status: 200,
-        payload: diaryService.getNonSensitiveDiaries()
-    }
-
-    res.json(response)
+    diaryService.getNonSensitiveDiaries()
+        .then(diaries => {
+            const response: Response = {
+                message: 'Diaries retrieved successfully',
+                status: 200,
+                payload: diaries
+            }
+            res.json(response)
+        })
+        .catch(err => {
+            const response: Response = {
+                message: 'Error retrieving diaries',
+                status: 500,
+                payload: err.message
+            }
+            res.status(500).json(response)
+        })
 })
 
 /**
@@ -57,16 +67,23 @@ router.get('/', verifyToken, (_req, res) => {
    *         description: Not found
    */
 router.get('/:id', verifyToken, (req, res) => {
-    const diary = diaryService.getDiaryBy(+req.params.id)
-    const error = diary === undefined
-
-    const response: Response = {
-        message: error ? 'Diary entry not found' : 'Diary entry found',
-        status: error ? 404 : 200,
-        payload: diary
-    }
-
-    res.json(response)
+    diaryService.getDiaryBy(+req.params.id)
+        .then(diary => {
+            const response: Response = {
+                message: 'Diary retrieved successfully',
+                status: 200,
+                payload: diary
+            }
+            res.json(response)
+        })
+        .catch(err => {
+            const response: Response = {
+                message: 'Error retrieving diary',
+                status: 404,
+                payload: err.message
+            }
+            res.status(404).json(response)
+        })
 })
 
 /**
