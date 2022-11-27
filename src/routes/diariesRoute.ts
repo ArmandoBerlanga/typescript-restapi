@@ -21,15 +21,27 @@ const router = express.Router()
    *          application/json:
    *           schema:
    *              $ref: '#/components/schemas/Response'
+   *       401:
+   *         description: Unauthorized
    */
 router.get('/', verifyToken, (_req, res) => {
     const response: Response = {
-        message: 'All diaries',
+        message: 'Diaries retrieved successfully',
         status: 200,
-        payload: diaryService.getNonSensitiveDiaries()
+        payload: {}
     }
 
-    res.json(response)
+    diaryService.getNonSensitiveDiaries()
+        .then(diaries => {
+            response.payload = diaries
+            res.json(response)
+        })
+        .catch(err => {
+            response.message = 'Error retrieving diaries'
+            response.status = 500
+            response.payload = err.message
+            res.status(500).json(response)
+        })
 })
 
 /**
@@ -53,20 +65,29 @@ router.get('/', verifyToken, (_req, res) => {
    *          application/json:
    *           schema:
    *              $ref: '#/components/schemas/Response'
+   *       401:
+   *         description: Unauthorized
    *       404:
    *         description: Not found
    */
 router.get('/:id', verifyToken, (req, res) => {
-    const diary = diaryService.getDiaryBy(+req.params.id)
-    const error = diary === undefined
-
     const response: Response = {
-        message: error ? 'Diary entry not found' : 'Diary entry found',
-        status: error ? 404 : 200,
-        payload: diary
+        message: 'Diary retrieved successfully',
+        status: 200,
+        payload: {}
     }
 
-    res.json(response)
+    diaryService.getDiaryBy(+req.params.id)
+        .then(diary => {
+            response.payload = diary
+            res.json(response)
+        })
+        .catch(err => {
+            response.message = 'Error retrieving diary'
+            response.status = 404
+            response.payload = err.message
+            res.status(404).json(response)
+        })
 })
 
 /**
@@ -91,28 +112,45 @@ router.get('/:id', verifyToken, (req, res) => {
    *          application/json:
    *            schema:
    *              $ref: '#/components/schemas/Response'
+   *      400:
+   *        description: Bad request
+   *      401:
+   *        description: Unauthorized
    *      500:
    *        description: Internal server error
    */
 router.post('/', verifyToken, (req, res) => {
     const { date, weather, visibility, comment } = req.body
 
-    const newDiary = diaryService.addDiary({
+    const response: Response = {
+        message: 'Diary added successfully',
+        status: 200,
+        payload: {}
+    }
+
+    diaryService.addDiary({
         date,
         weather,
         visibility,
         comment
     })
+        .then(newDiary => {
+            response.payload = newDiary
+            
+            if (newDiary instanceof Array) {
+                response.message = 'Missing or incorrect parts of a diary entry'
+                response.status = 400
+                res.status(400).json(response)
+            }
 
-    const error = newDiary instanceof Array
-
-    const response: Response = {
-        message: error ? 'Errors at adding diary entry' : 'Diary entry added',
-        status: error ? 500 : 200,
-        payload: newDiary
-    }
-
-    res.json(response)
+            res.json(response)
+        })
+        .catch(err => {
+            response.message = 'Error adding diary'
+            response.status = 500
+            response.payload = err.message
+            res.status(500).json(response)
+        })  
 })
 
 export default router

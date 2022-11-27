@@ -1,12 +1,10 @@
-import data from '../diaries.json'
 import { DiaryEntry, NewDiaryEntry, NonSensitiveDiaryEntry } from '../../types/diary/diary-types'
 import { diaryValidation } from './diaryValidation'
+import { getDiariesFromDB, addDiaryToDB } from '../../data/diaryData'
 
-const diaries: DiaryEntry[] = data as DiaryEntry[]
+export const getNonSensitiveDiaries = async (): Promise<NonSensitiveDiaryEntry[]> => {   
+    const diaries: DiaryEntry[] = await getDiariesFromDB()
 
-export const getDiaries = (): DiaryEntry[] => diaries
-
-export const getNonSensitiveDiaries = (): NonSensitiveDiaryEntry[] => {
     return diaries.map(({ id, date, weather, visibility }) => ({
         id,
         date,
@@ -15,21 +13,19 @@ export const getNonSensitiveDiaries = (): NonSensitiveDiaryEntry[] => {
     }))
 }
 
-export const getDiaryBy = (id: number): DiaryEntry | undefined => {
-    const entry = diaries.find(d => d.id === id)
-    return entry
+export const getDiaryBy = async (id: Number): Promise<DiaryEntry> => {
+    const diaries: DiaryEntry[] = await getDiariesFromDB(id)
+
+    if (diaries.length === 0)
+        throw new Error(`Diary with id ${+id} not found`)
+    return diaries[0]
 }
 
-export const addDiary = (payload: NewDiaryEntry): DiaryEntry | string[] => {
-    const errors = diaryValidation(payload)
-    if (errors.length > 0)
-        return errors
+export const addDiary = async (payload: NewDiaryEntry): Promise<DiaryEntry | string[]> => {
+    const comments = diaryValidation(payload)
+    if (comments.length > 0)
+        return comments
 
-    const newDiary = {
-        id: Math.max(...diaries.map(d => d.id)) + 1,
-        ...payload
-    }
-
-    diaries.push(newDiary)
+    const newDiary: DiaryEntry = await addDiaryToDB(payload)
     return newDiary
 }
