@@ -6,6 +6,10 @@
 npm install typescript -D
 ```
 
+### Comenarios
+* `npm install` es para instalar dependencias
+* `-D` es para instalar dependencias de desarrollo
+
 ## 2. Crea un archivo tsconfig.json
 
 ### 2.1 Primero añade al package.json un script de compilación
@@ -22,11 +26,4 @@ npm run tsc -- --init
 ```
 
 #### Comentarios
-- El -- --init es para que llegue el parametro a tsc
-
-
-
-npm i @types/express -D
-npm i typescript -D
-
-Es importante por que ocupan menos espacio
+* El -- --init es para que llegue el parametro a tsc
