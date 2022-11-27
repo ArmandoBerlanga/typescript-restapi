@@ -1,8 +1,6 @@
 import { DiaryEntry, NewDiaryEntry, NonSensitiveDiaryEntry } from '../../types/diary/diary-types'
 import { diaryValidation } from './diaryValidation'
-import { getDiariesFromDB } from '../../data/diaryData'
-
-let diaries: DiaryEntry[]
+import { getDiariesFromDB, addDiaryToDB } from '../../data/diaryData'
 
 export const getNonSensitiveDiaries = async (): Promise<NonSensitiveDiaryEntry[]> => {   
     const diaries: DiaryEntry[] = await getDiariesFromDB()
@@ -23,16 +21,11 @@ export const getDiaryBy = async (id: Number): Promise<DiaryEntry> => {
     return diaries[0]
 }
 
-export const addDiary = (payload: NewDiaryEntry): DiaryEntry | string[] => {
-    const errors = diaryValidation(payload)
-    if (errors.length > 0)
-        return errors
+export const addDiary = async (payload: NewDiaryEntry): Promise<DiaryEntry | string[]> => {
+    const comments = diaryValidation(payload)
+    if (comments.length > 0)
+        return comments
 
-    const newDiary = {
-        id: Math.max(...diaries.map(d => d.id)) + 1,
-        ...payload
-    }
-
-    diaries.push(newDiary)
+    const newDiary: DiaryEntry = await addDiaryToDB(payload)
     return newDiary
 }

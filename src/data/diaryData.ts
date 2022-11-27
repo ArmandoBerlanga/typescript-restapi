@@ -1,5 +1,5 @@
 import connect from '../middleware/database'
-import { DiaryEntry } from '../types/diary/diary-types'
+import { DiaryEntry, NewDiaryEntry } from '../types/diary/diary-types'
 
 export const getDiariesFromDB = async (id: Number | null = null): Promise<DiaryEntry[]> => { 
     const sp = 'Info.GetDiaryEntry'
@@ -12,7 +12,7 @@ export const getDiariesFromDB = async (id: Number | null = null): Promise<DiaryE
     return result.recordset
 }
 
-export const addDiaryToDB = async (payload: DiaryEntry): Promise<DiaryEntry> => {
+export const addDiaryToDB = async (payload: NewDiaryEntry): Promise<DiaryEntry> => {
     const sp = 'Info.AddDiaryEntry'
 
     const pool = await connect()
@@ -22,5 +22,6 @@ export const addDiaryToDB = async (payload: DiaryEntry): Promise<DiaryEntry> => 
         .input('Visibility', payload.visibility)
         .input('Comment', payload.comment)
         .execute(sp)
+        
     return result.recordset[0]
 }

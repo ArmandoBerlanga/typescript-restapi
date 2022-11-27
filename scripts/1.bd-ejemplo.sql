@@ -41,6 +41,10 @@ BEGIN
         UPDATE Info.Diary
         SET [Date] = @Date, Weather = @Weather, Visibility = @Visibility, Comment = @Comment
         WHERE ID = @ID
+
+    SELECT ID as id, [Date] as date, Weather as weather, Visibility as visibility, Comment as comment
+    FROM Info.Diary 
+    WHERE ISNULL(@ID, SCOPE_IDENTITY()) = ID
 END
 GO
 
