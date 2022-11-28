@@ -4,6 +4,9 @@ import setupSwagger from './middleware/swagger'
 
 import utilsRoute from './routes/utilsRoute'
 import diariesRoute from './routes/diariesRoute'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const PORT = 3000
 const app = express()
@@ -17,7 +20,9 @@ app.use('/api', utilsRoute)
 app.use('/api/diaries', diariesRoute)
 // ...
 
-setupSwagger(app)
+if (process.env.NODE_ENV !== 'production')
+    setupSwagger(app)
+
 app.use(cors({
     origin: '*'
 }))
