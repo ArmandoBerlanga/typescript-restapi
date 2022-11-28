@@ -16,6 +16,7 @@ app.use(express.json())
 // ...
 
 // routes
+app.get('/', (_req, res) => res.json({ message: 'TS-API!' }))
 app.use('/api', utilsRoute)
 app.use('/api/diaries', diariesRoute)
 // ...
